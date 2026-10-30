@@ -9,7 +9,7 @@ function Save-ServiceBackup {
     <#
     .SYNOPSIS
     Salva settings/env/secret-name/mount/identity del servizio in work/backup/<name>.json.
-    Non sovrascrive un backup esistente (il primo è lo stato pre-migrazione).
+    Non sovrascrive un backup esistente (il primo e' lo stato pre-migrazione).
     #>
     param(
         [Parameter(Mandatory)][pscustomobject]$Service,

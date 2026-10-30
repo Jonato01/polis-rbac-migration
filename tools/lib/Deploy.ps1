@@ -148,7 +148,7 @@ function Ensure-HostStorageAccount {
     <#
     .SYNOPSIS
     Storage account "host" per la Function App (content share / mount Azure Files, key-based per limite Azure).
-    Riusa un account host già distinto dai dati, altrimenti ne crea uno (polisprodfunchost[+4 random]).
+    Riusa un account host gia' distinto dai dati, altrimenti ne crea uno (polisprodfunchost[+4 random]).
     #>
     param(
         [Parameter(Mandatory)][string]$Rg,

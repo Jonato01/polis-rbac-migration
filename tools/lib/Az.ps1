@@ -1,7 +1,7 @@
 Set-StrictMode -Version Latest
 
 <#
-Wrapper unico per Azure CLI. Tutte le altre lib passano da Invoke-Az, così:
+Wrapper unico per Azure CLI. Tutte le altre lib passano da Invoke-Az, cosi':
 - i test possono mockare Invoke-AzProcess / Invoke-Az
 - WhatIf salta i comandi mutanti
 - il log non contiene mai valori di settings/secret

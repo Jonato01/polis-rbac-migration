@@ -10,8 +10,8 @@ $script:PhaseLabels = [ordered]@{
 
 function Get-ServiceRow {
     param([pscustomobject]$Svc, [hashtable]$State)
-    $mapped = if ($Svc.Mapping) { 'sì' } elseif ($Svc.Excluded) { 'escluso' } else { 'NO' }
-    $cells = @("| $($Svc.Name) | $($Svc.Kind) | $mapped | $(if ($Svc.Legacy) { 'legacy' } else { '' }) | $(if ($Svc.KeyBased) { 'sì' } else { 'no' })")
+    $mapped = if ($Svc.Mapping) { 'si' } elseif ($Svc.Excluded) { 'escluso' } else { 'NO' }
+    $cells = @("| $($Svc.Name) | $($Svc.Kind) | $mapped | $(if ($Svc.Legacy) { 'legacy' } else { '' }) | $(if ($Svc.KeyBased) { 'si' } else { 'no' })")
     foreach ($ph in $script:PhaseLabels.Keys) {
         $st = Get-StepStatus -State $State -Phase $ph -Service $Svc.Name
         $cells += $st

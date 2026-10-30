@@ -88,7 +88,7 @@ function Test-RoleAssignmentExists {
 function Ensure-RoleAssignment {
     <#
     .SYNOPSIS
-    Crea la role assignment se manca. Ritorna $true se creata ora, $false se già presente.
+    Crea la role assignment se manca. Ritorna $true se creata ora, $false se gia' presente.
     #>
     param(
         [Parameter(Mandatory)][string]$PrincipalId,
