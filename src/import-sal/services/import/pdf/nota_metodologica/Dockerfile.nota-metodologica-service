@@ -1,0 +1,27 @@
+FROM python:3.11-slim
+
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1
+
+WORKDIR /app
+
+# System deps
+RUN apt-get update && apt-get install -y gcc && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements and install (source in subfolder of build context)
+COPY nota_metodologica/requirements.txt ./requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy shared module from build context (services/import/pdf)
+COPY azure_clients.py ./
+COPY ocr_common.py ./
+
+# Copy service modules from subfolder
+COPY nota_metodologica/nota_metodologica_ocr.py ./
+COPY nota_metodologica/nota_metodologica_ocr_wrapper.py ./
+COPY nota_metodologica/nota_metodologica_service.py ./
+COPY nota_metodologica/extract_nota_metodologica_azure.py ./
+
+EXPOSE 8080
+
+CMD ["python", "-u", "nota_metodologica_service.py"]

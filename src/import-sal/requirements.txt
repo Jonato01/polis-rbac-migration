@@ -1,0 +1,17 @@
+azure-core
+# Azure dependencies for orchestrator
+azure-servicebus
+azure-identity
+
+# Web server for health checks
+flask
+
+# Environment and configuration
+python-dotenv
+
+# HTTP requests for notifications
+requests
+
+# JSON and UUID (built-in Python modules)
+# logging, threading, datetime, json, uuid are built-in
+openpyxl

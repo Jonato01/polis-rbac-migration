@@ -1,0 +1,44 @@
+FROM python:3.11-slim
+
+# Set environment variables
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1
+
+# Set working directory
+WORKDIR /app
+
+# Install system dependencies (including poppler for pdf2image and openssl for p7m)
+RUN apt-get update && apt-get install -y \
+    gcc \
+    poppler-utils \
+    openssl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements first for better caching
+COPY bdc/requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Install PyMuPDF for PDF to PNG conversion
+RUN pip install --no-cache-dir PyMuPDF
+
+# Copy the common OCR module from parent directory
+COPY azure_clients.py ./
+COPY ocr_common.py ./
+
+# Copy BDC specific files
+COPY bdc/bdc_processor.py ./
+COPY bdc/bdc_p7m_handler.py ./
+COPY bdc/bdc_cup_validator.py ./
+COPY bdc/bdc_missing_service.py ./
+
+# Expose port (if needed for health checks)
+EXPOSE 8080
+
+# Default mode: service (listens to Service Bus queue)
+# Override with --mode standalone for one-shot execution
+ENV RUN_MODE=service
+ENV BATCH_SIZE=50
+
+# Run the missing BDC import service
+CMD ["python", "-u", "bdc_missing_service.py", "--mode", "service"]
+

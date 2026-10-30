@@ -1,0 +1,37 @@
+FROM python:3.11-slim
+
+# Set environment variables
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1
+
+# Set working directory
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    gcc \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements first for better caching
+COPY aq/requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy the common OCR module from parent directory
+COPY azure_clients.py ./
+COPY ocr_common.py ./
+
+# Copy AQ specific files
+COPY aq/aq_ocr.py ./
+COPY aq/aq_missing_service.py ./
+
+# Expose port (if needed for health checks)
+EXPOSE 8080
+
+# Default mode: service (listens to Service Bus queue)
+# Override with --mode standalone for one-shot execution
+ENV RUN_MODE=service
+ENV BATCH_SIZE=50
+
+# Run the missing AQ import service
+CMD ["python", "-u", "aq_missing_service.py", "--mode", "service"]
+

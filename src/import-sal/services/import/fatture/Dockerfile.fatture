@@ -1,0 +1,22 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y \
+    default-mysql-client \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy all necessary Python modules
+COPY azure_clients.py ./
+COPY import_fatture_sal7.py .
+COPY import_error_handler.py .
+COPY fatture_service.py .
+
+# Create temp directory for downloaded files
+RUN mkdir -p /tmp
+
+# Entry point: run the queue listener service
+CMD ["python", "fatture_service.py"]

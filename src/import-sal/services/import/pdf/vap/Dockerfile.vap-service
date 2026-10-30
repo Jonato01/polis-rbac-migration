@@ -1,0 +1,24 @@
+FROM python:3.11-slim
+
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1
+
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y \
+    gcc \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY vap/requirements.txt ./requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY azure_clients.py ./
+COPY ocr_common.py ./
+COPY vap/vap_ocr.py ./
+COPY vap/vap_ocr_wrapper.py ./
+COPY vap/vap_service.py ./
+
+EXPOSE 8080
+
+CMD ["python", "-u", "vap_service.py"]
+

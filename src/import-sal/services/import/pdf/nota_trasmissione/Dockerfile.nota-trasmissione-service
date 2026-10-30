@@ -1,0 +1,33 @@
+FROM python:3.11-slim
+
+# Set environment variables
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1
+
+# Set working directory
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    gcc \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements first for better caching
+COPY nota_trasmissione/requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy the common OCR module from parent directory
+COPY azure_clients.py ./
+COPY ocr_common.py ./
+
+# Copy Nota Trasmissione specific files
+COPY nota_trasmissione/nota_trasmissione_ocr.py ./
+COPY nota_trasmissione/nota_trasmissione_ocr_wrapper.py ./
+COPY nota_trasmissione/nota_trasmissione_service.py ./
+
+# Expose port (if needed for health checks)
+EXPOSE 8080
+
+# Run the service that listens to the queue
+CMD ["python", "-u", "nota_trasmissione_service.py"]
+

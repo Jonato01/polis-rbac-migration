@@ -1,0 +1,21 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y \
+    default-mysql-client \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY azure_clients.py ./
+COPY import_personale_sal7.py .
+COPY import_error_handler.py .
+COPY excel_processor_main.py .
+
+# Imposta variabile d'ambiente con valore di default
+ENV SAL_STORAGE_NAME="8_SAL_30_04_2025"
+
+# Modifica l'entry point per usare la variabile
+CMD ["python", "excel_processor_main.py"]

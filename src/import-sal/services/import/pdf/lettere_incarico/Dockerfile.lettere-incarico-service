@@ -1,0 +1,30 @@
+FROM python:3.11-slim
+
+# Variabili d'ambiente Python
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1
+
+WORKDIR /app
+
+# Installa dipendenze sistema (gcc per compilare alcune librerie Python)
+RUN apt-get update && apt-get install -y gcc && rm -rf /var/lib/apt/lists/*
+
+# Copia requirements e installa dipendenze Python
+COPY lettere_incarico/requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copia modulo OCR condiviso (dalla directory parent)
+COPY azure_clients.py ./
+COPY ocr_common.py ./
+COPY matching_utils.py ./
+
+# Copia file Lettere Incarico specifici
+COPY lettere_incarico/lettere_incarico.py ./
+COPY lettere_incarico/lettere_incarico_wrapper.py ./
+COPY lettere_incarico/lettere_incarico_service.py ./
+
+# Espone porta (opzionale, per health checks futuri)
+EXPOSE 8080
+
+# Comando di avvio
+CMD ["python", "-u", "lettere_incarico_service.py"]

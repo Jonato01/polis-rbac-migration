@@ -1,0 +1,27 @@
+﻿# Service Bus dependencies
+azure-servicebus>=7.0.0
+# HTTP requests
+requests>=2.28.0
+# Database connectivity
+pymysql
+mysql-connector-python>=8.0.0
+# OpenAI for OCR
+openai>=1.0.0
+# PDF processing
+PyPDF2>=3.0.0
+pdf2image>=1.16.0
+Pillow>=10.0.0
+# Azure Storage
+azure-storage-blob
+azure-identity
+# Azure AI Document Intelligence (Form Recognizer)
+azure-ai-formrecognizer>=3.3.0
+azure-core
+# P7M handling (cryptography)
+cryptography>=41.0.0
+# PDF processing with PyMuPDF (for pdf_to_png_base64)
+PyMuPDF>=1.23.0
+# Optional dependencies
+python-dotenv
+tenacity>=8.0.0
+

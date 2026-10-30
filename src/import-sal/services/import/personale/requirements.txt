@@ -1,0 +1,28 @@
+# Service Bus dependencies
+azure-servicebus>=7.0.0
+
+# HTTP requests
+requests>=2.28.0
+
+# Database connectivity
+pymysql
+mysql-connector-python>=8.0.0
+
+# Excel processing
+pandas>=1.5.0
+openpyxl>=3.0.0
+python-dateutil>=2.8.0
+
+# Azure Storage
+azure-storage-blob
+azure-identity
+
+# SFTP (if needed for compatibility)
+paramiko
+
+# Container management (if needed)
+azure-mgmt-containerinstance
+
+# Optional dependencies
+python-dotenv
+anthropic>=0.3.0

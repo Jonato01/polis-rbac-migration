@@ -1,0 +1,19 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Install dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy service files
+COPY azure_clients.py ./
+COPY sftp_bulk_sync_service.py .
+
+# Note: .colenv should NOT be included in production images
+# Use environment variables in Container Apps instead
+# For local development, mount the file or use system environment variables
+
+# Run the service
+CMD ["python", "-u", "sftp_bulk_sync_service.py"]
+

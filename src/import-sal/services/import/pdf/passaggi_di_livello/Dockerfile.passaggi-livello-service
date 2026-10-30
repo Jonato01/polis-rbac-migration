@@ -1,0 +1,35 @@
+FROM python:3.11-slim
+
+# Set environment variables
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1
+
+# Set working directory
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    gcc \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements first for better caching
+COPY passaggi_di_livello/requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy the common modules from parent directory
+COPY azure_clients.py ./
+COPY ocr_common.py ./
+COPY match_passaggi_dipendenti.py ./
+COPY matching_utils.py ./
+
+# Copy Passaggi di Livello specific files
+COPY passaggi_di_livello/passaggi_livello.py ./
+COPY passaggi_di_livello/passaggi_livello_wrapper.py ./
+COPY passaggi_di_livello/passaggi_livello_service.py ./
+
+# Expose port (if needed for health checks)
+EXPOSE 8080
+
+# Run the service that listens to the queue
+CMD ["python", "-u", "passaggi_livello_service.py"]
+
