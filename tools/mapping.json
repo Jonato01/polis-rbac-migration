@@ -1,0 +1,158 @@
+{
+  "$comment": "Mappa servizi Azure -> sorgente -> modifiche settings. image = nome immagine normalizzato (senza registry/tag/-prod). Placeholder: {storage} {servicebus} {hostStorage} {currentSetting:NAME}.",
+  "sharedTargets": [
+    "src/import_fatture/container_app",
+    "src/import-sal",
+    "src/import-sal/services/import/autogen-pdf-import",
+    "src/import-sal/services/sftp",
+    "src/import-sal/services/backup-db",
+    "src/import-sal/services/backup-container",
+    "src/import-sal/services/documentation",
+    "src/import-sal/services/cleanup",
+    "src/import-sal/services/rollback",
+    "src/import-sal/services/import/fatture",
+    "src/import-sal/services/import/personale",
+    "src/import-sal/services/import/pdf",
+    "src/servicebus-bridge",
+    "src/polis-sal-sftp-sync"
+  ],
+  "errorPatterns": ["Unauthorized", "AuthenticationFailed", "CredentialUnavailableError", "AuthorizationPermissionMismatch", "ManagedIdentityCredential authentication unavailable", " 401 ", " 403 "],
+  "containerApps": [
+    {
+      "image": "polis-import", "context": "src/import_fatture", "dockerfile": "container_app/Dockerfile",
+      "legacy": false, "needsStorage": true, "needsServiceBus": true,
+      "add": { "AZURE_STORAGE_ACCOUNT_NAME": "{storage}", "AZURE_SERVICEBUS_NAMESPACE": "{servicebus}" },
+      "remove": ["AZURE_STORAGE_CONNECTION_STRING", "AZURE_SERVICEBUS_CONNECTION_STRING"],
+      "removeSecrets": [],
+      "errorPatterns": ["Unauthorized", "AuthenticationFailed", "CredentialUnavailableError", "AuthorizationPermissionMismatch", " 401 ", " 403 "]
+    },
+    {
+      "image": "autogen-pdf-import", "context": "src/import-sal/services/import/autogen-pdf-import", "dockerfile": "Dockerfile",
+      "legacy": false, "needsStorage": true, "needsServiceBus": true,
+      "add": { "AZURE_STORAGE_ACCOUNT_NAME": "{storage}", "SERVICE_BUS_NAMESPACE": "{servicebus}" },
+      "remove": ["AZURE_STORAGE_CONNECTION_STRING", "SERVICE_BUS_CONNECTION_STRING"],
+      "removeSecrets": ["service-bus-connection-string", "azure-storage-connection"],
+      "errorPatterns": ["Unauthorized", "AuthenticationFailed", "CredentialUnavailableError", "AuthorizationPermissionMismatch", " 401 ", " 403 "]
+    },
+    {
+      "image": "servicebus-bridge", "context": "src/servicebus-bridge", "dockerfile": "Dockerfile",
+      "legacy": false, "needsStorage": false, "needsServiceBus": true,
+      "add": { "SERVICE_BUS_NAMESPACE": "{servicebus}" },
+      "remove": ["SERVICE_BUS_CONNECTION_STRING"],
+      "removeSecrets": [],
+      "errorPatterns": ["Unauthorized", "AuthenticationFailed", "CredentialUnavailableError", "ERRORE connessione Service Bus", " 401 ", " 403 "]
+    },
+    {
+      "image": "import-sal-orchestrator", "context": "src/import-sal", "dockerfile": "Dockerfile",
+      "legacy": true, "needsStorage": false, "needsServiceBus": true,
+      "add": { "SERVICE_BUS_NAMESPACE": "{servicebus}" },
+      "remove": ["SERVICE_BUS_CONNECTION_STRING", "AZURE_STORAGE_CONNECTION_STRING", "CONTAINER_REGISTRY_PASSWORD", "CONTAINER_REGISTRY_USERNAME"],
+      "removeSecrets": ["service-bus-connection", "azure-storage-connection", "container-registry-password"],
+      "errorPatterns": ["Unauthorized", "AuthenticationFailed", "CredentialUnavailableError", "Missing required environment variables", " 401 ", " 403 "]
+    },
+    { "image": "sftp-service", "context": "src/import-sal/services/sftp", "dockerfile": "Dockerfile", "legacy": true, "needsStorage": true, "needsServiceBus": true,
+      "add": { "AZURE_STORAGE_ACCOUNT_NAME": "{storage}", "SERVICE_BUS_NAMESPACE": "{servicebus}" }, "remove": ["AZURE_STORAGE_CONNECTION_STRING", "SERVICE_BUS_CONNECTION_STRING"],
+      "removeSecrets": ["service-bus-connection", "azure-storage-connection"], "errorPatterns": ["Unauthorized", "AuthenticationFailed", "CredentialUnavailableError", " 401 ", " 403 "] },
+    { "image": "sftp-bulk-sync", "context": "src/import-sal/services/sftp", "dockerfile": "Dockerfile.bulk-sync", "legacy": true, "needsStorage": true, "needsServiceBus": true,
+      "add": { "AZURE_STORAGE_ACCOUNT_NAME": "{storage}", "SERVICE_BUS_NAMESPACE": "{servicebus}" }, "remove": ["AZURE_STORAGE_CONNECTION_STRING", "SERVICE_BUS_CONNECTION_STRING"],
+      "removeSecrets": ["service-bus-connection", "azure-storage-connection"], "errorPatterns": ["Unauthorized", "AuthenticationFailed", "CredentialUnavailableError", " 401 ", " 403 "] },
+    { "image": "db-backup-service", "context": "src/import-sal/services/backup-db", "dockerfile": "Dockerfile", "legacy": true, "needsStorage": true, "needsServiceBus": true,
+      "add": { "AZURE_STORAGE_ACCOUNT_NAME": "{storage}", "SERVICE_BUS_NAMESPACE": "{servicebus}" }, "remove": ["AZURE_STORAGE_CONNECTION_STRING", "SERVICE_BUS_CONNECTION_STRING"],
+      "removeSecrets": ["service-bus-connection", "azure-storage-connection"], "errorPatterns": ["Unauthorized", "AuthenticationFailed", "CredentialUnavailableError", " 401 ", " 403 "] },
+    { "image": "container-backup-service", "context": "src/import-sal/services/backup-container", "dockerfile": "Dockerfile.container-backup", "legacy": true, "needsStorage": true, "needsServiceBus": true,
+      "add": { "AZURE_STORAGE_ACCOUNT_NAME": "{storage}", "SERVICE_BUS_NAMESPACE": "{servicebus}" }, "remove": ["AZURE_STORAGE_CONNECTION_STRING", "SERVICE_BUS_CONNECTION_STRING"],
+      "removeSecrets": ["service-bus-connection", "azure-storage-connection"], "errorPatterns": ["Unauthorized", "AuthenticationFailed", "CredentialUnavailableError", " 401 ", " 403 "] },
+    { "image": "documentation-service", "context": "src/import-sal/services/documentation", "dockerfile": "Dockerfile.documentation", "legacy": true, "needsStorage": true, "needsServiceBus": true,
+      "add": { "AZURE_STORAGE_ACCOUNT_NAME": "{storage}", "SERVICE_BUS_NAMESPACE": "{servicebus}" }, "remove": ["AZURE_STORAGE_CONNECTION_STRING", "SERVICE_BUS_CONNECTION_STRING"],
+      "removeSecrets": ["service-bus-connection", "azure-storage-connection"], "errorPatterns": ["Unauthorized", "AuthenticationFailed", "CredentialUnavailableError", " 401 ", " 403 "] },
+    { "image": "storage-cleanup", "context": "src/import-sal/services/cleanup", "dockerfile": "Dockerfile.storage-cleanup", "legacy": true, "needsStorage": true, "needsServiceBus": true,
+      "add": { "AZURE_STORAGE_ACCOUNT_NAME": "{storage}", "SERVICE_BUS_NAMESPACE": "{servicebus}" }, "remove": ["AZURE_STORAGE_CONNECTION_STRING", "SERVICE_BUS_CONNECTION_STRING"],
+      "removeSecrets": ["service-bus-connection", "azure-storage-connection"], "errorPatterns": ["Unauthorized", "AuthenticationFailed", "CredentialUnavailableError", " 401 ", " 403 "] },
+    { "image": "personale-service", "context": "src/import-sal/services/import/personale", "dockerfile": "Dockerfile.personale", "legacy": true, "needsStorage": true, "needsServiceBus": true,
+      "add": { "AZURE_STORAGE_ACCOUNT_NAME": "{storage}", "SERVICE_BUS_NAMESPACE": "{servicebus}" }, "remove": ["AZURE_STORAGE_CONNECTION_STRING", "SERVICE_BUS_CONNECTION_STRING"],
+      "removeSecrets": ["service-bus-connection", "azure-storage-connection"], "errorPatterns": ["Unauthorized", "AuthenticationFailed", "CredentialUnavailableError", " 401 ", " 403 "] },
+    { "image": "fatture-service", "context": "src/import-sal/services/import/fatture", "dockerfile": "Dockerfile.fatture", "legacy": true, "needsStorage": true, "needsServiceBus": true,
+      "add": { "AZURE_STORAGE_ACCOUNT_NAME": "{storage}", "SERVICE_BUS_NAMESPACE": "{servicebus}" }, "remove": ["AZURE_STORAGE_CONNECTION_STRING", "SERVICE_BUS_CONNECTION_STRING"],
+      "removeSecrets": ["service-bus-connection", "azure-storage-connection"], "errorPatterns": ["Unauthorized", "AuthenticationFailed", "CredentialUnavailableError", " 401 ", " 403 "] },
+    { "image": "db-rollback-sal", "context": "src/import-sal/services/rollback", "dockerfile": "Dockerfile", "legacy": true, "needsStorage": true, "needsServiceBus": true,
+      "add": { "AZURE_STORAGE_ACCOUNT_NAME": "{storage}", "SERVICE_BUS_NAMESPACE": "{servicebus}" }, "remove": ["AZURE_STORAGE_CONNECTION_STRING", "SERVICE_BUS_CONNECTION_STRING"],
+      "removeSecrets": ["service-bus-connection", "azure-storage-connection"], "errorPatterns": ["Unauthorized", "AuthenticationFailed", "CredentialUnavailableError", " 401 ", " 403 "] },
+    { "image": "aq-service", "context": "src/import-sal/services/import/pdf", "dockerfile": "aq/Dockerfile.aq-service", "legacy": true, "needsStorage": true, "needsServiceBus": true,
+      "add": { "AZURE_STORAGE_ACCOUNT_NAME": "{storage}", "SERVICE_BUS_NAMESPACE": "{servicebus}" }, "remove": ["AZURE_STORAGE_CONNECTION_STRING", "SERVICE_BUS_CONNECTION_STRING"],
+      "removeSecrets": ["service-bus-connection", "azure-storage-connection"], "errorPatterns": ["Unauthorized", "AuthenticationFailed", "CredentialUnavailableError", " 401 ", " 403 "] },
+    { "image": "aq-missing-service", "context": "src/import-sal/services/import/pdf", "dockerfile": "aq/Dockerfile.aq-missing-service", "legacy": true, "needsStorage": true, "needsServiceBus": true,
+      "add": { "AZURE_STORAGE_ACCOUNT_NAME": "{storage}", "SERVICE_BUS_NAMESPACE": "{servicebus}" }, "remove": ["AZURE_STORAGE_CONNECTION_STRING", "SERVICE_BUS_CONNECTION_STRING"],
+      "removeSecrets": ["service-bus-connection", "azure-storage-connection"], "errorPatterns": ["Unauthorized", "AuthenticationFailed", "CredentialUnavailableError", " 401 ", " 403 "] },
+    { "image": "bdc-service", "context": "src/import-sal/services/import/pdf", "dockerfile": "bdc/Dockerfile.bdc-service", "legacy": true, "needsStorage": true, "needsServiceBus": true,
+      "add": { "AZURE_STORAGE_ACCOUNT_NAME": "{storage}", "SERVICE_BUS_NAMESPACE": "{servicebus}" }, "remove": ["AZURE_STORAGE_CONNECTION_STRING", "SERVICE_BUS_CONNECTION_STRING"],
+      "removeSecrets": ["service-bus-connection", "azure-storage-connection"], "errorPatterns": ["Unauthorized", "AuthenticationFailed", "CredentialUnavailableError", " 401 ", " 403 "] },
+    { "image": "bdc-missing-service", "context": "src/import-sal/services/import/pdf", "dockerfile": "bdc/Dockerfile.bdc-missing-service", "legacy": true, "needsStorage": true, "needsServiceBus": true,
+      "add": { "AZURE_STORAGE_ACCOUNT_NAME": "{storage}", "SERVICE_BUS_NAMESPACE": "{servicebus}" }, "remove": ["AZURE_STORAGE_CONNECTION_STRING", "SERVICE_BUS_CONNECTION_STRING"],
+      "removeSecrets": ["service-bus-connection", "azure-storage-connection"], "errorPatterns": ["Unauthorized", "AuthenticationFailed", "CredentialUnavailableError", " 401 ", " 403 "] },
+    { "image": "fatture-pdf-service", "context": "src/import-sal/services/import/pdf", "dockerfile": "fatture/Dockerfile.fatture-service", "legacy": true, "needsStorage": true, "needsServiceBus": true,
+      "add": { "AZURE_STORAGE_ACCOUNT_NAME": "{storage}", "SERVICE_BUS_NAMESPACE": "{servicebus}" }, "remove": ["AZURE_STORAGE_CONNECTION_STRING", "SERVICE_BUS_CONNECTION_STRING"],
+      "removeSecrets": ["service-bus-connection", "azure-storage-connection"], "errorPatterns": ["Unauthorized", "AuthenticationFailed", "CredentialUnavailableError", " 401 ", " 403 "] },
+    { "image": "iva-indetraibile-service", "context": "src/import-sal/services/import/pdf", "dockerfile": "iva_indetraibile/Dockerfile.iva-indetraibile-service", "legacy": true, "needsStorage": true, "needsServiceBus": true,
+      "add": { "AZURE_STORAGE_ACCOUNT_NAME": "{storage}", "SERVICE_BUS_NAMESPACE": "{servicebus}" }, "remove": ["AZURE_STORAGE_CONNECTION_STRING", "SERVICE_BUS_CONNECTION_STRING"],
+      "removeSecrets": ["service-bus-connection", "azure-storage-connection"], "errorPatterns": ["Unauthorized", "AuthenticationFailed", "CredentialUnavailableError", " 401 ", " 403 "] },
+    { "image": "lettere-incarico-service", "context": "src/import-sal/services/import/pdf", "dockerfile": "lettere_incarico/Dockerfile.lettere-incarico-service", "legacy": true, "needsStorage": true, "needsServiceBus": true,
+      "add": { "AZURE_STORAGE_ACCOUNT_NAME": "{storage}", "SERVICE_BUS_NAMESPACE": "{servicebus}" }, "remove": ["AZURE_STORAGE_CONNECTION_STRING", "SERVICE_BUS_CONNECTION_STRING"],
+      "removeSecrets": ["service-bus-connection", "azure-storage-connection"], "errorPatterns": ["Unauthorized", "AuthenticationFailed", "CredentialUnavailableError", " 401 ", " 403 "] },
+    { "image": "nota-metodologica-service", "context": "src/import-sal/services/import/pdf", "dockerfile": "nota_metodologica/Dockerfile.nota-metodologica-service", "legacy": true, "needsStorage": true, "needsServiceBus": true,
+      "add": { "AZURE_STORAGE_ACCOUNT_NAME": "{storage}", "SERVICE_BUS_NAMESPACE": "{servicebus}" }, "remove": ["AZURE_STORAGE_CONNECTION_STRING", "SERVICE_BUS_CONNECTION_STRING"],
+      "removeSecrets": ["service-bus-connection", "azure-storage-connection"], "errorPatterns": ["Unauthorized", "AuthenticationFailed", "CredentialUnavailableError", " 401 ", " 403 "] },
+    { "image": "nota-trasmissione-service", "context": "src/import-sal/services/import/pdf", "dockerfile": "nota_trasmissione/Dockerfile.nota-trasmissione-service", "legacy": true, "needsStorage": true, "needsServiceBus": true,
+      "add": { "AZURE_STORAGE_ACCOUNT_NAME": "{storage}", "SERVICE_BUS_NAMESPACE": "{servicebus}" }, "remove": ["AZURE_STORAGE_CONNECTION_STRING", "SERVICE_BUS_CONNECTION_STRING"],
+      "removeSecrets": ["service-bus-connection", "azure-storage-connection"], "errorPatterns": ["Unauthorized", "AuthenticationFailed", "CredentialUnavailableError", " 401 ", " 403 "] },
+    { "image": "passaggi-livello-service", "context": "src/import-sal/services/import/pdf", "dockerfile": "passaggi_di_livello/Dockerfile.passaggi-livello-service", "legacy": true, "needsStorage": true, "needsServiceBus": true,
+      "add": { "AZURE_STORAGE_ACCOUNT_NAME": "{storage}", "SERVICE_BUS_NAMESPACE": "{servicebus}" }, "remove": ["AZURE_STORAGE_CONNECTION_STRING", "SERVICE_BUS_CONNECTION_STRING"],
+      "removeSecrets": ["service-bus-connection", "azure-storage-connection"], "errorPatterns": ["Unauthorized", "AuthenticationFailed", "CredentialUnavailableError", " 401 ", " 403 "] },
+    { "image": "timesheet-service", "context": "src/import-sal/services/import/pdf", "dockerfile": "timesheet/Dockerfile.timesheet-service", "legacy": true, "needsStorage": true, "needsServiceBus": true,
+      "add": { "AZURE_STORAGE_ACCOUNT_NAME": "{storage}", "SERVICE_BUS_NAMESPACE": "{servicebus}" }, "remove": ["AZURE_STORAGE_CONNECTION_STRING", "SERVICE_BUS_CONNECTION_STRING"],
+      "removeSecrets": ["service-bus-connection", "azure-storage-connection"], "errorPatterns": ["Unauthorized", "AuthenticationFailed", "CredentialUnavailableError", " 401 ", " 403 "] },
+    { "image": "vap-service", "context": "src/import-sal/services/import/pdf", "dockerfile": "vap/Dockerfile.vap-service", "legacy": true, "needsStorage": true, "needsServiceBus": true,
+      "add": { "AZURE_STORAGE_ACCOUNT_NAME": "{storage}", "SERVICE_BUS_NAMESPACE": "{servicebus}" }, "remove": ["AZURE_STORAGE_CONNECTION_STRING", "SERVICE_BUS_CONNECTION_STRING"],
+      "removeSecrets": ["service-bus-connection", "azure-storage-connection"], "errorPatterns": ["Unauthorized", "AuthenticationFailed", "CredentialUnavailableError", " 401 ", " 403 "] }
+  ],
+  "webApps": [
+    {
+      "match": "sal-import$|sal-sftp-api", "repo": "polis-sal-sftp-api", "expectedCommit": "",
+      "needsStorage": true, "needsServiceBus": true, "health": "/docs",
+      "add": { "AZURE_STORAGE_ACCOUNT_NAME": "{currentSetting:AZURE_ACCOUNT_NAME}", "SERVICE_BUS_NAMESPACE": "{servicebus}" },
+      "remove": ["AZURE_ACCOUNT_KEY", "SERVICE_BUS_CONNECTION_STRING"]
+    },
+    {
+      "match": "api-database", "repo": "polis-api-database", "expectedCommit": "",
+      "needsStorage": false, "needsServiceBus": true, "health": "/",
+      "add": { "SERVICE_BUS_NAMESPACE": "{servicebus}" },
+      "remove": ["SERVICE_BUS_CONNECTION_STRING"]
+    },
+    {
+      "match": "polis(-prod|-coll)?-(api-)?ai$", "repo": "polis-ai-2", "expectedCommit": "",
+      "needsStorage": false, "needsServiceBus": true, "health": "/",
+      "add": { "SERVICE_BUS_NAMESPACE": "{servicebus}" },
+      "remove": ["SERVICE_BUS_CONNECTION_STRING"]
+    },
+    {
+      "match": "frontend", "repo": "polis-frontend", "expectedCommit": "", "settingsOnly": true,
+      "needsStorage": false, "needsServiceBus": false, "health": "/",
+      "add": {},
+      "remove": ["SERVICE_BUS_CONNECTION_STRING"]
+    }
+  ],
+  "functionApps": [
+    {
+      "match": "sftp-upload", "context": "src/polis-sal-sftp-sync",
+      "needsStorage": true, "needsServiceBus": true, "hostStorage": true,
+      "add": { "AzureWebJobsStorage__accountName": "{hostStorage}", "DATA_STORAGE_ACCOUNT_NAME": "{storage}", "SERVICE_BUS_NAMESPACE": "{servicebus}" },
+      "remove": ["AzureWebJobsStorage", "AzureWebJobsDashboard", "SERVICE_BUS_CONNECTION_STRING"]
+    },
+    {
+      "match": "orchestrator-func", "settingsOnly": true, "requireDeclarativeBindings": true,
+      "needsStorage": false, "needsServiceBus": true, "hostStorage": true,
+      "add": { "AzureWebJobsStorage__accountName": "{hostStorage}", "ServiceBusConnection__fullyQualifiedNamespace": "{servicebus}" },
+      "remove": ["AzureWebJobsStorage", "AzureWebJobsDashboard", "ServiceBusConnection"]
+    }
+  ],
+  "excludedWebApps": ["api-storage", "sal-import-web"]
+}
