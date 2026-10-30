@@ -100,5 +100,5 @@ function Get-KeyBasedSettings {
         if ($k -match '__accountName$|__fullyQualifiedNamespace$') { continue }
         if ($v -match 'AccountKey=' -or $v -match 'SharedAccessKey=' -or $v -match 'SharedAccessSignature=') { $found += $k; continue }
     }
-    return [string[]]($found | Sort-Object)
+    return [string[]]@($found | Sort-Object)
 }

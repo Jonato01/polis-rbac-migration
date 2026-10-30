@@ -26,6 +26,7 @@ function Get-NormalizedImageName {
     $name = $name.ToLowerInvariant()
     $name = $name -replace '^polis-(prod|coll)-', 'polis-'
     $name = $name -replace '-(prod|coll)$', ''
+    $name = $name -replace '-(prod|coll)-', '-'   # es. autogen-prod-pdf-import
     return $name
 }
 

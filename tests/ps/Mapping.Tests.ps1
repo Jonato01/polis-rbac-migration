@@ -35,6 +35,9 @@ Describe 'Get-NormalizedImageName' {
     It 'handles digest references and upper-case registry' {
         Get-NormalizedImageName 'POLISREGISTRYPROD.azurecr.io/servicebus-bridge@sha256:abc123' | Should -Be 'servicebus-bridge'
     }
+    It 'strips a -prod- infix' {
+        Get-NormalizedImageName 'polisregistryprod.azurecr.io/autogen-prod-pdf-import:latest' | Should -Be 'autogen-pdf-import'
+    }
     It 'returns empty string for empty input' {
         Get-NormalizedImageName '' | Should -Be ''
     }
