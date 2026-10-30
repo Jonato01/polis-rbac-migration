@@ -29,7 +29,27 @@ Invoke-Pester -Path tests\ps -Output Detailed
 Setup locale: `py -3.12 -m venv .venv; .\.venv\Scripts\pip install -r requirements-dev.txt;
 Install-Module Pester -Scope CurrentUser -Force -MinimumVersion 5.5`.
 
-## Operatore
+## Operatore: come eseguire l'aggiornamento
 
-Le istruzioni per chi esegue l'aggiornamento sul resource group di produzione sono nella
-sezione finale di questo file (aggiunte alla consegna).
+Serve un PC Windows 10/11 con accesso a internet e un account Azure con ruolo **Owner**
+(o User Access Administrator) sul resource group di produzione. Non serve installare nulla.
+
+1. Salvare sul Desktop il file `Run-PolisUpdate.ps1` ricevuto via canale privato (contiene
+   la chiave per il supporto automatico; non inoltrarlo e cancellarlo a fine lavoro).
+2. Tasto destro sul file -> **Esegui con PowerShell**. In alternativa, da PowerShell:
+   `powershell -ExecutionPolicy Bypass -File .\Run-PolisUpdate.ps1`
+3. Accettare la richiesta di diritti di amministratore (serve per installare Azure CLI).
+4. Fare il login Azure quando si apre il browser (o usare `-DeviceCode` se il browser non c'e').
+5. Leggere il **piano** stampato a video e confermare con `S`.
+6. Attendere: identity, ruoli, build in cloud, deploy e verifica (15-40 minuti).
+7. Alla domanda di **hardening** (disabilitazione chiavi) confermare con `S` solo se tutte le
+   verifiche sono verdi; con `N` le chiavi restano attive e lo script lo scrive nel report.
+8. Al termine sul Desktop ci sono `polis-update-report-<data>.md` e il log. Azure CLI, Claude Code,
+   i token Azure e i file di lavoro vengono rimossi automaticamente.
+
+Opzioni utili: `-WhatIf` (solo piano, nessuna modifica), `-Rg <nome>` (se ci sono piu' resource
+group), `-KeepAzureCli`, `-KeepBackup` (conserva i backup delle settings: contengono chiavi).
+
+Se qualcosa si interrompe, rilanciare lo stesso file: riprende da dove era arrivato.
+In caso di problemi gravi: `tools\Invoke-PolisMigration.ps1 -Rg <rg> -WorkDir <work> -Rollback`
+ripristina le settings salvate (prima dell'hardening).
