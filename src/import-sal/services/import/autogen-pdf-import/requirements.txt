@@ -1,0 +1,32 @@
+# AutoGen (Microsoft AutoGen Framework)
+pyautogen==0.2.35
+
+# Azure
+azure-storage-blob>=12.19.0
+azure-servicebus>=7.11.0
+azure-identity>=1.15.0
+
+# Anthropic (Claude)
+anthropic>=0.42.0
+
+# Database
+mysql-connector-python>=8.3.0
+
+# HTTP
+requests>=2.31.0
+httpx>=0.26.0
+
+# Utilities
+python-dotenv>=1.0.0
+tenacity>=8.2.0
+PyPDF2>=3.0.0
+Pillow>=10.2.0
+PyMuPDF>=1.23.0
+
+# Async
+aiohttp>=3.9.0
+aiofiles>=23.2.0
+
+# P7M extraction
+asn1crypto>=1.5.0
+
