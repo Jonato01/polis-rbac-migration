@@ -96,6 +96,7 @@ function Ensure-RoleAssignment {
         [Parameter(Mandatory)][string]$Scope
     )
     if (Test-RoleAssignmentExists -PrincipalId $PrincipalId -Role $Role -Scope $Scope) { return $false }
+    if (Get-AzWhatIf) { Write-AzLog "[WHATIF] role assignment $Role -> $PrincipalId @ $Scope"; return $false }
     Invoke-Az @('role', 'assignment', 'create', '--assignee-object-id', $PrincipalId, '--assignee-principal-type', 'ServicePrincipal', '--role', $Role, '--scope', $Scope) | Out-Null
     return $true
 }
@@ -112,6 +113,7 @@ function Wait-RoleAssignment {
         [int]$TimeoutSec = 300,
         [int]$PollSec = 10
     )
+    if (Get-AzWhatIf) { return }
     $deadline = (Get-Date).AddSeconds($TimeoutSec)
     do {
         if (Test-RoleAssignmentExists -PrincipalId $PrincipalId -Role $Role -Scope $Scope) { return }

@@ -118,6 +118,9 @@ function Invoke-ClaudeFallback {
     )
     $key = [string]$Context.Options.AnthropicApiKey
     if (-not (Test-AnthropicKey -Key $key)) {
+        if ($Context.Options.ContainsKey('NonInteractive') -and $Context.Options.NonInteractive) {
+            return @{ Ok = $false; Skipped = $true; Summary = 'fallback saltato: nessuna API key valida (modalita'' non interattiva)'; ResultPath = $null; Transcript = '' }
+        }
         $key = Read-FallbackKey
         if (-not (Test-AnthropicKey -Key $key)) {
             return @{ Ok = $false; Skipped = $true; Summary = 'fallback saltato: nessuna API key Anthropic valida'; ResultPath = $null; Transcript = '' }

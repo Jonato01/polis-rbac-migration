@@ -154,5 +154,5 @@
       "remove": ["AzureWebJobsStorage", "AzureWebJobsDashboard", "ServiceBusConnection"]
     }
   ],
-  "excludedWebApps": ["api-storage", "sal-import-web"]
+  "excludedWebApps": ["api-storage", "sal-import-web", "sal-sftp-web"]
 }
