@@ -116,19 +116,19 @@
   ],
   "webApps": [
     {
-      "match": "sal-import$|sal-sftp-api", "repo": "polis-sal-sftp-api", "expectedCommit": "",
+      "match": "sal-import$|sal-sftp-api", "repo": "polis-sal-sftp-api", "expectedCommit": "4ba154a60c75d204a2c1c5f46a514ed33b340859",
       "needsStorage": true, "needsServiceBus": true, "health": "/docs",
       "add": { "AZURE_STORAGE_ACCOUNT_NAME": "{currentSetting:AZURE_ACCOUNT_NAME}", "SERVICE_BUS_NAMESPACE": "{servicebus}" },
       "remove": ["AZURE_ACCOUNT_KEY", "SERVICE_BUS_CONNECTION_STRING"]
     },
     {
-      "match": "api-database", "repo": "polis-api-database", "expectedCommit": "",
+      "match": "api-database", "repo": "polis-api-database", "expectedCommit": "97d3774b62a3428d35d91a4627797d48ed17f268",
       "needsStorage": false, "needsServiceBus": true, "health": "/",
       "add": { "SERVICE_BUS_NAMESPACE": "{servicebus}" },
       "remove": ["SERVICE_BUS_CONNECTION_STRING"]
     },
     {
-      "match": "polis(-prod|-coll)?-(api-)?ai$", "repo": "polis-ai-2", "expectedCommit": "",
+      "match": "polis(-prod|-coll)?-(api-)?ai$", "repo": "polis-ai-2", "expectedCommit": "08ce76f7a45a5eed61caebcadad118e42b4b60f1",
       "needsStorage": false, "needsServiceBus": true, "health": "/",
       "add": { "SERVICE_BUS_NAMESPACE": "{servicebus}" },
       "remove": ["SERVICE_BUS_CONNECTION_STRING"]
