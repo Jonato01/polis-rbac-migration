@@ -1,0 +1,20 @@
+# Dipendenze esistenti (dal progetto root)
+et_xmlfile==2.0.0
+mysql-connector-python==9.3.0
+numpy==2.2.6
+openpyxl==3.1.5
+pandas==2.2.3
+python-dateutil==2.9.0.post0
+pytz==2025.2
+six==1.17.0
+tzdata==2025.2
+anthropic==0.68.0
+
+# Nuove dipendenze per container app
+azure-storage-blob>=12.19.0
+azure-servicebus>=7.11.0
+azure-identity>=1.15.0
+
+openai>=1.0.0
+python-dotenv>=1.0.0
+sqlalchemy>=2.0.0
