@@ -1,0 +1,27 @@
+# local tooling
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.superpowers/
+work/
+
+# generated bootstrap with secrets — never commit
+bootstrap/Run-PolisUpdate.ps1
+
+# secrets / environment files
+.env
+.env.*
+*.env
+.prodenv
+.colenv
+.envprod
+.envcol
+local.settings.json
+
+# IDE / misc
+.idea/
+**/.claude/settings.local.json
+logs/
+*.zip
+*.log
