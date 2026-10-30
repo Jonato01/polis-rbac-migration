@@ -1,0 +1,4 @@
+azure-servicebus
+requests
+python-dotenv
+azure-identity>=1.15.0
